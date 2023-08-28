@@ -7,33 +7,33 @@ echo "This is an example post-deploy script. Run as site system user"
 # - Runs as site's system user
 # - Runs from within site /.gpconfig dir
 
-echo "In: $GP_GIT_RELEASE_PATH"
-ls -l $GP_GIT_RELEASE_PATH
+# echo "In: $GP_GIT_RELEASE_PATH"
+# ls -l $GP_GIT_RELEASE_PATH
 
-echo "--------------------------"
+# echo "--------------------------"
 
-if [[ -n $GP_GIT_SITE_BUILD ]]; then
+# if [[ -n $GP_GIT_SITE_BUILD ]]; then
 
-  echo "This is a site build rebuilt binds"
+#   echo "This is a site build rebuilt binds"
 
-  echo "In: $GP_GIT_SITE_WEBROOT_PATH"
-  ls -l $GP_GIT_SITE_WEBROOT_PATH
+#   echo "In: $GP_GIT_SITE_WEBROOT_PATH"
+#   ls -l $GP_GIT_SITE_WEBROOT_PATH
 
-  echo "--------------------------"
+#   echo "--------------------------"
 
-  echo "mkdir ${GP_GIT_SITE_PATH}/public/postdeploy"
-  echo "touch ${GP_GIT_SITE_PATH}/public/postdeploy/file"
+#   echo "mkdir ${GP_GIT_SITE_PATH}/public/postdeploy"
+#   echo "touch ${GP_GIT_SITE_PATH}/public/postdeploy/file"
 
-  mkdir -p ${GP_GIT_SITE_PATH}/public/postdeploy
-  touch ${GP_GIT_SITE_PATH}/public/postdeploy/file
-  ls -l ${GP_GIT_SITE_PATH}/public/postdeploy
+#   mkdir -p ${GP_GIT_SITE_PATH}/public/postdeploy
+#   touch ${GP_GIT_SITE_PATH}/public/postdeploy/file
+#   ls -l ${GP_GIT_SITE_PATH}/public/postdeploy
 
-else
+# else
 
-  echo "This is a server MT code deploy rebuilt binds"
+#   echo "This is a server MT code deploy rebuilt binds"
 
-fi
+# fi
 
-echo "--------------------------"
+# echo "--------------------------"
 
 
