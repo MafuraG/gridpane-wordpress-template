@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "This is an example post-deploy script. Running as root user"
+echo "This is an example post-deploy script. Running as root user - 1111"
 
 # Server wide access
 # - Runs after files have been deployed 

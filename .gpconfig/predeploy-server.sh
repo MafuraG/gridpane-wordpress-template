@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "This is an example pre-deploy script. Run using root user"
+echo "This is an example pre-deploy script. Run using root user - 1111"
 
 # Server wide access
 # - Runs before files have been deployed 
