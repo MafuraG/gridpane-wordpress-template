@@ -15,33 +15,39 @@ global $nginx_helper_admin;
 $error_log_filesize = false;
 
 $args = array(
-	'enable_purge'                     => FILTER_SANITIZE_STRING,
-	'enable_stamp'                     => FILTER_SANITIZE_STRING,
-	'purge_method'                     => FILTER_SANITIZE_STRING,
-	'is_submit'                        => FILTER_SANITIZE_STRING,
-	'redis_hostname'                   => FILTER_SANITIZE_STRING,
-	'redis_port'                       => FILTER_SANITIZE_STRING,
-	'redis_prefix'                     => FILTER_SANITIZE_STRING,
-	'purge_homepage_on_edit'           => FILTER_SANITIZE_STRING,
-	'purge_homepage_on_del'            => FILTER_SANITIZE_STRING,
-	'purge_url'                        => FILTER_SANITIZE_STRING,
-	'log_level'                        => FILTER_SANITIZE_STRING,
-	'log_filesize'                     => FILTER_SANITIZE_STRING,
-	'smart_http_expire_save'           => FILTER_SANITIZE_STRING,
-	'cache_method'                     => FILTER_SANITIZE_STRING,
-	'enable_map'                       => FILTER_SANITIZE_STRING,
-	'enable_log'                       => FILTER_SANITIZE_STRING,
-	'purge_archive_on_edit'            => FILTER_SANITIZE_STRING,
-	'purge_archive_on_del'             => FILTER_SANITIZE_STRING,
-	'purge_archive_on_new_comment'     => FILTER_SANITIZE_STRING,
-	'purge_archive_on_deleted_comment' => FILTER_SANITIZE_STRING,
-	'purge_page_on_mod'                => FILTER_SANITIZE_STRING,
-	'purge_page_on_new_comment'        => FILTER_SANITIZE_STRING,
-	'purge_page_on_deleted_comment'    => FILTER_SANITIZE_STRING,
-	'smart_http_expire_form_nonce'     => FILTER_SANITIZE_STRING,
+	'enable_purge',
+	'enable_stamp',
+	'purge_method',
+	'is_submit',
+	'redis_hostname',
+	'redis_port',
+	'redis_prefix',
+	'purge_homepage_on_edit',
+	'purge_homepage_on_del',
+	'purge_url',
+	'log_level',
+	'log_filesize',
+	'smart_http_expire_save',
+	'cache_method',
+	'enable_map',
+	'enable_log',
+	'purge_archive_on_edit',
+	'purge_archive_on_del',
+	'purge_archive_on_new_comment',
+	'purge_archive_on_deleted_comment',
+	'purge_page_on_mod',
+	'purge_page_on_new_comment',
+	'purge_page_on_deleted_comment',
+	'smart_http_expire_form_nonce',
 );
 
-$all_inputs = filter_input_array( INPUT_POST, $args );
+$all_inputs = array();
+
+foreach ( $args as $val ) {
+	if ( isset( $_POST[ $val ] ) ) {
+		$all_inputs[ $val ] = wp_strip_all_tags( $_POST[ $val ] );
+	}
+}
 
 if ( isset( $all_inputs['smart_http_expire_save'] ) && wp_verify_nonce( $all_inputs['smart_http_expire_form_nonce'], 'smart-http-expire-form-nonce' ) ) {
 	unset( $all_inputs['smart_http_expire_save'] );
@@ -533,9 +539,46 @@ if ( is_multisite() ) {
 				<?php } ?>
 					<tr valign="top">
 						<td>
-							<input type="checkbox" value="1" id="enable_log" name="enable_log"<?php checked( $nginx_helper_settings['enable_log'], 1 ); ?> />
+							<?php
+							$is_checkbox_enabled = false;
+							if ( 1 === (int) $nginx_helper_settings['enable_log'] ) {
+								$is_checkbox_enabled = true;
+							}
+							?>
+							<input
+								type="checkbox" value="1" id="enable_log" name="enable_log"
+								<?php checked( $nginx_helper_admin->is_nginx_log_enabled(), true ); ?>
+								<?php echo esc_attr( $is_checkbox_enabled ? '' : ' disabled ' ); ?>
+							/>
 							<label for="enable_log">
 								<?php esc_html_e( 'Enable Logging', 'nginx-helper' ); ?>
+								<?php
+								if ( ! $is_checkbox_enabled ) {
+
+									$setting_message_detail = [
+										'status' => __( 'disable', 'nginx-helper' ),
+										'value'  => 'false',
+									];
+
+									if ( ! $nginx_helper_admin->is_nginx_log_enabled() ) {
+										$setting_message_detail = [
+											'status' => __( 'enable', 'nginx-helper' ),
+											'value'  => 'true',
+										];
+									}
+
+									printf(
+										'<p class="enable-logging-message">(<b>%1$s:</b> %2$s %3$s %4$s <b>NGINX_HELPER_LOG</b> constant %5$s <b>%6$s</b> %7$s <b>wp-config.php</b>)</p>',
+										esc_html__( 'NOTE', 'nginx-helper' ),
+										esc_html__( 'To', 'nginx-helper' ),
+										esc_html( $setting_message_detail['status'] ),
+										esc_html__( 'the logging feature, you must define', 'nginx-helper' ),
+										esc_html__( 'as', 'nginx-helper' ),
+										esc_html( $setting_message_detail['value'] ),
+										esc_html__( 'in your', 'nginx-helper' )
+									);
+								}
+								?>
 							</label>
 						</td>
 					</tr>
@@ -620,7 +663,7 @@ if ( is_multisite() ) {
 		<?php
 	}
 	?>
-	<div class="postbox enable_log"<?php echo ( empty( $nginx_helper_settings['enable_log'] ) ) ? ' style="display: none;"' : ''; ?>>
+	<div class="postbox enable_log"<?php echo ( ! $nginx_helper_admin->is_nginx_log_enabled() ) ? ' style="display: none;"' : ''; ?>>
 		<h3 class="hndle">
 			<span><?php esc_html_e( 'Logging Options', 'nginx-helper' ); ?></span>
 		</h3>
@@ -629,7 +672,7 @@ if ( is_multisite() ) {
 			if ( ! is_dir( $log_path ) ) {
 				mkdir( $log_path );
 			}
-			if ( ! file_exists( $log_path . 'nginx.log' ) ) {
+			if ( is_writable( $log_path ) && ! file_exists( $log_path . 'nginx.log' ) ) {
 				$log = fopen( $log_path . 'nginx.log', 'w' );
 				fclose( $log );
 			}
@@ -720,7 +763,7 @@ if ( is_multisite() ) {
 			</table>
 		</div> <!-- End of .inside -->
 	</div>
-    <input type="hidden" name="smart_http_expire_form_nonce" value="<?php echo wp_create_nonce('smart-http-expire-form-nonce'); ?>"/>
+	<input type="hidden" name="smart_http_expire_form_nonce" value="<?php echo esc_attr( wp_create_nonce( 'smart-http-expire-form-nonce' ) ); ?>" />
 	<?php
 		submit_button( __( 'Save All Changes', 'nginx-helper' ), 'primary large', 'smart_http_expire_save', true );
 	?>
