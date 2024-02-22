@@ -1,0 +1,1 @@
+/var/www/git-master01.com/htdocs/wp-content/plugins/wp-fail2ban/wp-fail2ban.php
