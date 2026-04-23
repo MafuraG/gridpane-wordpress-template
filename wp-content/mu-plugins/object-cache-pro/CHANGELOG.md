@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## v1.25.4 - 2026-04-22
+### Changed
+- Preserve valid options in fallback when `Configuration::safelyFrom()` fails
+- Improved failure resilience of `wp_cache_get_multiple()`
+- Improved logging of failed transactions
+
+### Fixed
+- Resolved rare deprecation notice
+- Improved rare pipeline initialization failure handling
+- Throw exception in `PhpRedisClusterConnection` when `ping()` or `info()` fail
+
 ## v1.25.3 - 2026-04-08
 ### Fixed
 - Fixed Query Monitor 4.x compatibility

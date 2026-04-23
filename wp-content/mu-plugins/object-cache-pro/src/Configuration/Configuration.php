@@ -641,11 +641,11 @@ final class Configuration
         try {
             return static::from($config);
         } catch (Throwable $exception) {
-            $instance = static::fromArray([
-                'client' => false,
-            ])->init();
+            $instance = \is_array($config)
+                ? static::partiallyFromArray($config)->init()
+                : static::fromArray(['client' => false])->init();
 
-            $instance->initException = $exception;
+            $instance->initException = $instance->initException ?? $exception;
 
             return $instance;
         }
@@ -673,6 +673,45 @@ final class Configuration
             $method = \str_replace(' ', '', \ucwords($method));
 
             $config->{"set{$method}"}($value);
+        }
+
+        return $config;
+    }
+
+    /**
+     * Create a new configuration instance from an array, tolerating
+     * individual setter failures so that valid options still apply.
+     * The first exception encountered is recorded on `initException`.
+     *
+     * @param  array<mixed>  $array
+     * @return self
+     */
+    protected static function partiallyFromArray(array $array): self
+    {
+        $config = new static;
+
+        try {
+            $client = $config->determineClient($array['client'] ?? null);
+            $array = ['client' => $client] + $array;
+        } catch (Throwable $exception) {
+            $config->initException = $config->initException ?? $exception;
+        }
+
+        try {
+            $array['strict'] = $config->determineStrictMode($array);
+        } catch (Throwable $exception) {
+            $config->initException = $config->initException ?? $exception;
+        }
+
+        foreach ($array as $name => $value) {
+            $method = \str_replace('_', ' ', \strtolower($name));
+            $method = \str_replace(' ', '', \ucwords($method));
+
+            try {
+                $config->{"set{$method}"}($value);
+            } catch (Throwable $exception) {
+                $config->initException = $config->initException ?? $exception;
+            }
         }
 
         return $config;
