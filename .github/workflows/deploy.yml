@@ -20,13 +20,13 @@ jobs:
         run: |
           if [ "${{ github.ref_name }}" == "main" ]; then
             echo "SSH_HOST=${{ secrets.SSH_HOST_LIVE }}" >> $GITHUB_ENV
-            echo "WP_PATH=/var/www/oxfordeconomics.com/htdocs" >> $GITHUB_ENV
+            echo "WP_PATH=/var/www/live-git.cloudhapa.xyz/htdocs" >> $GITHUB_ENV
           elif [ "${{ github.ref_name }}" == "staging" ]; then
             echo "SSH_HOST=${{ secrets.SSH_HOST_STAGING }}" >> $GITHUB_ENV
-            echo "WP_PATH=/var/www/oestaging.oxfordeconomics.com/htdocs" >> $GITHUB_ENV
+            echo "WP_PATH=/var/www/stg-git.cloudhapa.xyz/htdocs" >> $GITHUB_ENV
           elif [ "${{ github.ref_name }}" == "develop" ]; then
             echo "SSH_HOST=${{ secrets.SSH_HOST_DEV }}" >> $GITHUB_ENV
-            echo "WP_PATH=/var/www/oedevelopment.oxfordeconomics.com/htdocs" >> $GITHUB_ENV
+            echo "WP_PATH=/var/www/dev-git.cloudhapa.xyz/htdocs" >> $GITHUB_ENV
           fi
 
       - name: Setup SSH
