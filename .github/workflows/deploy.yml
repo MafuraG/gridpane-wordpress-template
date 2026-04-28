@@ -1,0 +1,50 @@
+name: Deploy WordPress
+
+on:
+  push:
+    branches:
+      - staging
+      - develop
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set environment variables
+        id: env
+        run: |
+          if [ "${{ github.ref_name }}" == "main" ]; then
+            echo "SSH_HOST=${{ secrets.SSH_HOST_LIVE }}" >> $GITHUB_ENV
+            echo "WP_PATH=/var/www/oxfordeconomics.com/htdocs" >> $GITHUB_ENV
+          elif [ "${{ github.ref_name }}" == "staging" ]; then
+            echo "SSH_HOST=${{ secrets.SSH_HOST_STAGING }}" >> $GITHUB_ENV
+            echo "WP_PATH=/var/www/oestaging.oxfordeconomics.com/htdocs" >> $GITHUB_ENV
+          elif [ "${{ github.ref_name }}" == "develop" ]; then
+            echo "SSH_HOST=${{ secrets.SSH_HOST_DEV }}" >> $GITHUB_ENV
+            echo "WP_PATH=/var/www/oedevelopment.oxfordeconomics.com/htdocs" >> $GITHUB_ENV
+          fi
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
+
+      - name: Deploy via rsync
+        run: |
+          rsync -avz --delete \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='wp-config.php' \
+            --exclude='wp-content/uploads' \
+            ./ ${{ secrets.SSH_USER }}@$SSH_HOST:$WP_PATH/
+
+      - name: Reload Nginx
+        run: |
+          ssh ${{ secrets.SSH_USER }}@$SSH_HOST "sudo systemctl reload nginx"
