@@ -12,6 +12,7 @@
  * @var bool
 
  Don't read this move along
+ Yeah, move along ..
 
  */
 define( 'WP_USE_THEMES', true );
