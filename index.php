@@ -10,6 +10,10 @@
  * Tells WordPress to load the WordPress theme and output it.
  *
  * @var bool
+
+ Don't read this move along
+ Yeah, move along ..
+
  */
 define( 'WP_USE_THEMES', true );
 
