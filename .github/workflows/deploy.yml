@@ -48,3 +48,6 @@ jobs:
       - name: Reload Nginx
         run: |
           ssh ${{ secrets.SSH_USER }}@$SSH_HOST "sudo systemctl reload nginx"
+      - name: Reset Perms and Clear Cache
+        run: |
+          ssh ${{ secrets.SSH_USER }}@$SSH_HOST "sudo gp fix perms && gp fix cache"
